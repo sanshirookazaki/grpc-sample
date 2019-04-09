@@ -21,6 +21,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -44,20 +45,24 @@ func main() {
 	c := pb.NewGreeterClient(conn)
 
 	// Contact the server and print out its response.
+	var age int64
+	age = 25
 	name := defaultName
 	if len(os.Args) > 1 {
 		name = os.Args[1]
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
+	r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name, Age: age})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
 	log.Printf("Greeting: %s", r.Message)
-	r, err = c.SayHelloAgain(ctx, &pb.HelloRequest{Name: name})
+	fmt.Println(int(r.Age))
+	r, err = c.SayHelloAgain(ctx, &pb.HelloRequest{Name: name, Age: age})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
 	log.Printf("Greeting: %s", r.Message)
+	fmt.Println(int(r.Age))
 }
