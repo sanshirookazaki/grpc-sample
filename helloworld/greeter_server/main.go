@@ -22,7 +22,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net"
 
@@ -37,15 +36,19 @@ const (
 // server is used to implement helloworld.GreeterServer.
 type server struct{}
 
-// SayHello implements helloworld.GreeterServer
-func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-	log.Printf("Received: %v", in.Name)
-	log.Printf(string(in.Age))
-	return &pb.HelloReply{Message: "Hello " + in.Name, Age: in.Age}, nil
+type listHelloReply struct {
+	list []*pb.HelloReply
 }
 
-func (s *server) SayHelloAgain(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-	return &pb.HelloReply{Message: "Hello again " + in.Name, Age: in.Age}, nil
+// SayHello implements helloworld.GreeterServer
+func (s *server) SayHello(req *pb.HelloRequest, stream pb.Greeter_SayHelloServer) error {
+	var replist listHelloReply
+	for _, request := range replist.list {
+		if err := stream.Send(request); err != nil {
+			return err
+		}
+	}
+	return nil 
 }
 
 func main() {
